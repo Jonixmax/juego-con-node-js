@@ -1,88 +1,301 @@
-// Importamos la librería para leer las respuestas del jugador
+process.stdout.setEncoding('utf8');
 const readline = require('readline-sync');
 
-// 1. Clases de personajes (Nuestro "molde")
+// ================================
+// CLASES
+// ================================
 class Animal {
-    constructor(nombre) { 
-        this.nombre = nombre; 
-        this.energia = 100; // Energía inicial
+    constructor(nombre) {
+        this.nombre = nombre;
+        this.energia = 100;
+        this.vidas = 3;
+        this.ataque = 15;
     }
-    
-    // Nueva acción genérica
+
     descansar() {
         this.energia += 20;
-        console.log(`[Zzz] ${this.nombre} tomó una siesta. Recuperó energía. (Energía: ${this.energia})`);
+        if (this.energia > 100) this.energia = 100;
+        console.log(`\n[Zzz] ${this.nombre} descanso y recupero energia. Energia actual: ${this.energia}`);
+    }
+
+    comer() {
+        const comidaEncontrada = Math.floor(Math.random() * 21) + 10; // 10 a 30
+        this.energia += comidaEncontrada;
+        if (this.energia > 100) this.energia = 100;
+        console.log(`\n[COMIDA] ${this.nombre} encontro comida y recupero ${comidaEncontrada} de energia.`);
+        console.log(`Energia actual: ${this.energia}`);
+    }
+
+    recibirDanio(cantidad) {
+        this.energia -= cantidad;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[DANIO] ${this.nombre} recibio ${cantidad} de danio. Energia restante: ${this.energia}`);
+    }
+
+    perderVida() {
+        this.vidas--;
+        this.energia = 50;
+
+        if (this.vidas > 0) {
+            console.log(`\n[VIDA PERDIDA] ${this.nombre} perdio una vida.`);
+            console.log(`Vidas restantes: ${this.vidas}`);
+            console.log(`La energia se restablecio a ${this.energia}.`);
+        }
+    }
+
+    mostrarEstado() {
+        console.log('\n========== ESTADO DEL PERSONAJE ==========');
+        console.log(`Nombre  : ${this.nombre}`);
+        console.log(`Energia : ${this.energia}`);
+        console.log(`Vidas   : ${this.vidas}`);
+        console.log(`Ataque  : ${this.ataque}`);
+        console.log('==========================================\n');
     }
 }
 
 class Mono extends Animal {
-    trepar() { 
-        this.energia -= 15; 
-        console.log(`[ACCIÓN] ${this.nombre} trepó ágilmente a la copa de un árbol. (Energía: ${this.energia})`);
+    constructor(nombre) {
+        super(nombre);
+        this.ataque = 18;
+    }
+
+    habilidadEspecial() {
+        this.energia -= 15;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[ACCION] ${this.nombre} trepo agilmente a un arbol y avanzo por el bosque. Energia: ${this.energia}`);
     }
 }
 
 class Conejo extends Animal {
-    saltar() { 
-        this.energia -= 10; 
-        console.log(`[ACCIÓN] ${this.nombre} dio un salto gigante. (Energía: ${this.energia})`);
+    constructor(nombre) {
+        super(nombre);
+        this.ataque = 14;
+    }
+
+    habilidadEspecial() {
+        this.energia -= 10;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[ACCION] ${this.nombre} dio un gran salto entre los arbustos. Energia: ${this.energia}`);
     }
 }
 
-// 2. INICIO DEL JUEGO
-console.log('\n==================================');
-console.log('   AVENTURA EN EL BOSQUE INFINITO');
-console.log('==================================\n');
+class Enemigo {
+    constructor(nombre, energia, ataque) {
+        this.nombre = nombre;
+        this.energia = energia;
+        this.ataque = ataque;
+    }
 
-// Selección de personaje
-const opcionesPersonaje = ['El Mono Ágil', 'El Conejo Veloz'];
-const indicePersonaje = readline.keyInSelect(opcionesPersonaje, '¿A quién eliges para esta aventura?');
-
-if (indicePersonaje === -1) {
-    console.log('Decidiste no entrar al bosque. ¡Hasta luego!');
-    process.exit(); 
+    recibirDanio(cantidad) {
+        this.energia -= cantidad;
+        if (this.energia < 0) this.energia = 0;
+    }
 }
 
-let jugador = (indicePersonaje === 0) ? new Mono('George') : new Conejo('Bugs');
-console.log(`\n¡Bienvenido al bosque, ${jugador.nombre}! Tu energía inicial es ${jugador.energia}.\n`);
+// ================================
+// FUNCIONES DEL JUEGO
+// ================================
+function crearEnemigoAleatorio() {
+    const enemigos = [
+        new Enemigo('Lobo Salvaje', 40, 12),
+        new Enemigo('Serpiente Gigante', 35, 10),
+        new Enemigo('Jabali Furioso', 50, 14),
+        new Enemigo('Aguila Cazadora', 30, 11)
+    ];
 
-// 3. EL BUCLE DE JUEGO (GAME LOOP)
-// Esto se repetirá infinitamente MIENTRAS la energía sea mayor que 0
-while (jugador.energia > 0) {
-    console.log('----------------------------------');
-    
-    // Opciones del menú principal
-    const opcionesAccion = ['Explorar el bosque', 'Descansar', 'Huir del bosque (Salir)'];
-    const accion = readline.keyInSelect(opcionesAccion, '¿Qué deseas hacer ahora?');
+    const indice = Math.floor(Math.random() * enemigos.length);
+    return enemigos[indice];
+}
 
-    // Evaluamos la decisión del jugador
-    if (accion === 0) {
-        // Explorar gasta energía usando la habilidad especial del animal
-        console.log('\nDecides adentrarte en la maleza...');
-        if (jugador instanceof Mono) {
-            jugador.trepar();
+function combate(jugador, enemigo) {
+    console.log('\n==================================');
+    console.log(`¡Ha aparecido un enemigo: ${enemigo.nombre}!`);
+    console.log(`Energia del enemigo: ${enemigo.energia}`);
+    console.log('==================================\n');
+
+    while (jugador.energia > 0 && enemigo.energia > 0) {
+        console.log('\n--- TURNO DE COMBATE ---');
+        console.log(`Tu energia: ${jugador.energia}`);
+        console.log(`Energia de ${enemigo.nombre}: ${enemigo.energia}`);
+        console.log('\n1. Atacar');
+        console.log('2. Defender');
+        console.log('3. Huir');
+
+        const opcion = readline.question('Elige una opcion: ');
+
+        if (opcion === '1') {
+            const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque; // ataque base + random
+            enemigo.recibirDanio(golpeJugador);
+            console.log(`\n[ATAQUE] ${jugador.nombre} ataco a ${enemigo.nombre} y le hizo ${golpeJugador} de danio.`);
+
+            if (enemigo.energia > 0) {
+                const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                jugador.recibirDanio(golpeEnemigo);
+                console.log(`[CONTRAATAQUE] ${enemigo.nombre} te ataco e hizo ${golpeEnemigo} de danio.`);
+            }
+
+        } else if (opcion === '2') {
+            const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+            const reducido = Math.floor(golpeEnemigo / 2);
+            jugador.recibirDanio(reducido);
+            console.log(`\n[DEFENSA] ${jugador.nombre} se defendio.`);
+            console.log(`[ATAQUE ENEMIGO] ${enemigo.nombre} hizo ${golpeEnemigo}, pero solo recibiste ${reducido}.`);
+
+        } else if (opcion === '3') {
+            const escapar = Math.random();
+
+            if (escapar < 0.5) {
+                console.log(`\n[HUIDA] ${jugador.nombre} logro escapar del ${enemigo.nombre}.`);
+                return 'huida';
+            } else {
+                console.log(`\n[HUIDA FALLIDA] No pudiste escapar.`);
+                const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                jugador.recibirDanio(golpeEnemigo);
+                console.log(`${enemigo.nombre} te golpeo mientras intentabas huir.`);
+            }
+
         } else {
-            jugador.saltar();
+            console.log('\nOpcion invalida.');
         }
-        
-    } else if (accion === 1) {
-        // Descansar recupera energía
-        console.log('\nEncuentras un lugar seguro...');
-        jugador.descansar();
-        
-    } else if (accion === 2 || accion === -1) {
-        // El jugador decide rendirse o presiona 0 (Cancelar)
-        console.log(`\n${jugador.nombre} decidió salir del bosque y volver a casa a salvo.`);
-        break; // La palabra 'break' rompe el bucle 'while' inmediatamente
     }
 
-    // Verificamos si el jugador se quedó sin energía después de la acción
     if (jugador.energia <= 0) {
-        console.log(`\nOh no... ${jugador.nombre} se quedó sin energía y se desmayó en el bosque.`);
-        console.log('FIN DEL JUEGO.');
+        jugador.perderVida();
+
+        if (jugador.vidas <= 0) {
+            console.log(`\n${jugador.nombre} ya no tiene vidas.`);
+            return 'derrota_total';
+        } else {
+            return 'vida_perdida';
+        }
+    }
+
+    if (enemigo.energia <= 0) {
+        console.log(`\n[VICTORIA] Derrotaste a ${enemigo.nombre}.`);
+        return 'victoria';
     }
 }
 
-console.log('\n==================================');
-console.log('   GRACIAS POR JUGAR');
-console.log('==================================\n');
+function explorar(jugador) {
+    console.log('\nTe adentras en el bosque...');
+    jugador.habilidadEspecial();
+
+    if (jugador.energia <= 0) {
+        jugador.perderVida();
+
+        if (jugador.vidas <= 0) {
+            return 'derrota_total';
+        }
+        return 'continuar';
+    }
+
+    const evento = Math.random();
+
+    if (evento < 0.4) {
+        console.log('\nEl bosque esta tranquilo. No encontraste enemigos.');
+        return 'sin_evento';
+    } else if (evento < 0.7) {
+        console.log('\nEncontraste frutas y agua fresca.');
+        jugador.comer();
+        return 'comida';
+    } else {
+        const enemigo = crearEnemigoAleatorio();
+        return combate(jugador, enemigo);
+    }
+}
+
+// ================================
+// INICIO DEL JUEGO
+// ================================
+console.log('\n================================================');
+console.log('        AVENTURA EN EL BOSQUE INFINITO');
+console.log('================================================');
+console.log('Objetivo: sobrevivir y ganar 3 exploraciones exitosas.\n');
+
+console.log('Elige tu personaje:');
+console.log('1. El Mono Agil');
+console.log('2. El Conejo Veloz');
+console.log('0. Salir');
+
+const opcionPersonaje = readline.question('\nIngresa una opcion: ');
+
+if (opcionPersonaje === '0') {
+    console.log('\nDecidiste no entrar al bosque. Hasta luego.');
+    process.exit();
+}
+
+let jugador;
+
+if (opcionPersonaje === '1') {
+    jugador = new Mono('George');
+} else if (opcionPersonaje === '2') {
+    jugador = new Conejo('Bugs');
+} else {
+    console.log('\nOpcion invalida. El juego se cerrara.');
+    process.exit();
+}
+
+let exploracionesGanadas = 0;
+const metaExploraciones = 3;
+
+console.log(`\n¡Bienvenido al bosque, ${jugador.nombre}!`);
+jugador.mostrarEstado();
+
+// ================================
+// BUCLE PRINCIPAL
+// ================================
+while (jugador.vidas > 0) {
+    console.log('\n============== MENU PRINCIPAL ==============');
+    console.log('1. Explorar el bosque');
+    console.log('2. Descansar');
+    console.log('3. Buscar comida');
+    console.log('4. Ver estado');
+    console.log('0. Salir del juego');
+    console.log('============================================');
+
+    const accion = readline.question('Que deseas hacer ahora? ');
+
+    if (accion === '1') {
+        const resultado = explorar(jugador);
+
+        if (resultado === 'victoria' || resultado === 'sin_evento' || resultado === 'comida' || resultado === 'huida') {
+            exploracionesGanadas++;
+            console.log(`\n[PROGRESO] Exploraciones superadas: ${exploracionesGanadas} de ${metaExploraciones}`);
+        }
+
+        if (resultado === 'derrota_total') {
+            console.log('\nHas perdido todas tus vidas.');
+            console.log('FIN DEL JUEGO.');
+            break;
+        }
+
+        if (exploracionesGanadas >= metaExploraciones) {
+            console.log('\n==========================================');
+            console.log(`¡FELICIDADES, ${jugador.nombre}!`);
+            console.log('Has sobrevivido al bosque infinito.');
+            console.log('GANASTE EL JUEGO.');
+            console.log('==========================================\n');
+            break;
+        }
+
+    } else if (accion === '2') {
+        jugador.descansar();
+
+    } else if (accion === '3') {
+        jugador.comer();
+
+    } else if (accion === '4') {
+        jugador.mostrarEstado();
+
+    } else if (accion === '0') {
+        console.log(`\n${jugador.nombre} decidio salir del bosque y volver a casa a salvo.`);
+        break;
+
+    } else {
+        console.log('\nOpcion invalida. Intenta de nuevo.');
+    }
+}
+
+console.log('\n================================================');
+console.log('              GRACIAS POR JUGAR');
+console.log('================================================\n');
