@@ -66,6 +66,45 @@ class Mono extends Animal {
     }
 }
 
+class Oso extends Animal {
+    constructor(nombre) {
+        super(nombre);
+        this.ataque = 20;
+    }
+
+    habilidadEspecial() {
+        this.energia -= 18;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[ACCION] ${this.nombre} mueve arboles caidos y se abre camino por el bosque. Energia: ${this.energia}`);
+    }
+}
+
+class Tigre extends Animal {
+    constructor(nombre) {
+        super(nombre);
+        this.ataque = 22;
+    }
+
+    habilidadEspecial() {
+        this.energia -= 17;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[ACCION] ${this.nombre} da zarpasos a ramas y arbustos, abriendose camino por el bosque. Energia: ${this.energia}`);
+    }
+}
+
+class Zorro extends Animal {
+    constructor(nombre) {
+        super(nombre);
+        this.ataque = 14;
+    }
+
+    habilidadEspecial() {
+        this.energia -= 10;
+        if (this.energia < 0) this.energia = 0;
+        console.log(`[ACCION] ${this.nombre} se escabulle rápidamente entre los arbustos. Energia: ${this.energia}`);
+    }
+}
+
 class Conejo extends Animal {
     constructor(nombre) {
         super(nombre);
@@ -98,6 +137,11 @@ class Enemigo {
 function crearEnemigoAleatorio() {
     const enemigos = [
         new Enemigo('Lobo Salvaje', 40, 12),
+        new Enemigo('Oso Hambriento', 45, 13),
+        new Enemigo('Pantera Sigilosa', 30, 15),
+        new Enemigo('Araña Gigante', 25, 9),
+        new Enemigo('Perro Rabioso', 35, 10),
+        new Enemigo('Escorpion Venenoso', 30, 11),
         new Enemigo('Serpiente Gigante', 35, 10),
         new Enemigo('Jabali Furioso', 50, 14),
         new Enemigo('Aguila Cazadora', 30, 11)
@@ -191,13 +235,40 @@ function explorar(jugador) {
 
     const evento = Math.random();
 
-    if (evento < 0.4) {
+    if (evento < 0.3) {
         console.log('\nEl bosque esta tranquilo. No encontraste enemigos.');
         return 'sin_evento';
+    } else if (evento < 0.5) {
+        console.log('\n¡Caíste en una trampa! Recibes 20 de daño.');
+        jugador.recibirDanio(20);
+        if (jugador.energia <= 0) {
+            jugador.perderVida();
+            if (jugador.vidas <= 0) {
+                return 'derrota_total';
+            }
+        }
+        return 'trampa';
     } else if (evento < 0.7) {
         console.log('\nEncontraste frutas y agua fresca.');
         jugador.comer();
         return 'comida';
+    } else if (evento < 0.8) {
+    console.log('\n¡Una tormenta repentina te golpea! Recibes daño por el clima.');
+    const danoClima = Math.floor(Math.random() * 15) + 5;
+    jugador.recibirDanio(danoClima);
+    if (jugador.energia <= 0) {
+        jugador.perderVida();
+        if (jugador.vidas <= 0) {
+            return 'derrota_total';
+        }
+    }
+    return 'clima_malo';
+    } else if (evento < 1.0) {
+    console.log('\n¡Descubriste un tesoro escondido! Recuperas energía y ganas un bonus.');
+    jugador.energia += 30;
+    if (jugador.energia > 100) jugador.energia = 100;
+    jugador.ataque += 2;  // Bonus permanente
+    return 'tesoro';
     } else {
         const enemigo = crearEnemigoAleatorio();
         return combate(jugador, enemigo);
@@ -213,6 +284,9 @@ console.log('================================================');
 console.log('Objetivo: sobrevivir y ganar 3 exploraciones exitosas.\n');
 
 console.log('Elige tu personaje:');
+console.log('5. El Zorro Astuto');
+console.log('4. El Tigre Feroz');
+console.log('3. El Oso Fuerte');
 console.log('1. El Mono Agil');
 console.log('2. El Conejo Veloz');
 console.log('0. Salir');
@@ -230,6 +304,12 @@ if (opcionPersonaje === '1') {
     jugador = new Mono('George');
 } else if (opcionPersonaje === '2') {
     jugador = new Conejo('Bugs');
+} else if (opcionPersonaje === '3') {
+    jugador = new Oso('Banjo');
+} else if (opcionPersonaje === '4') {
+    jugador = new Tigre('Terry');
+} else if (opcionPersonaje === '5') {
+    jugador = new Zorro('Jake');
 } else {
     console.log('\nOpcion invalida. El juego se cerrara.');
     process.exit();
@@ -258,7 +338,7 @@ while (jugador.vidas > 0) {
     if (accion === '1') {
         const resultado = explorar(jugador);
 
-        if (resultado === 'victoria' || resultado === 'sin_evento' || resultado === 'comida' || resultado === 'huida') {
+        if (resultado === 'victoria' || resultado === 'sin_evento' || resultado === 'comida' || resultado === 'huida' || resultado === 'trampa') {
             exploracionesGanadas++;
             console.log(`\n[PROGRESO] Exploraciones superadas: ${exploracionesGanadas} de ${metaExploraciones}`);
         }
