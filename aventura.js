@@ -1,114 +1,9 @@
+
 process.stdout.setEncoding('utf8');
 const readline = require('readline-sync');
 
-// ================================
-// CLASES
-// ================================
-class Animal {
-    constructor(nombre) {
-        this.nombre = nombre;
-        this.energia = 100;
-        this.vidas = 3;
-        this.ataque = 15;
-    }
-
-    descansar() {
-        this.energia += 20;
-        if (this.energia > 100) this.energia = 100;
-        console.log(`\n💤 [DESCANSO] ${this.nombre} tomo una siesta y recupero energia. Energia actual: ⚡ ${this.energia}`);
-    }
-
-    comer() {
-        const comidaEncontrada = Math.floor(Math.random() * 21) + 10; // 10 a 30
-        this.energia += comidaEncontrada;
-        if (this.energia > 100) this.energia = 100;
-        console.log(`\n🍎 [COMIDA] ${this.nombre} encontro algo de comer y recupero ${comidaEncontrada} de energia.`);
-        console.log(`Energia actual: ⚡ ${this.energia}`);
-    }
-
-    recibirDanio(cantidad) {
-        this.energia -= cantidad;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`💥 [DANIO] ${this.nombre} recibio ${cantidad} de danio. Energia restante: ⚡ ${this.energia}`);
-    }
-
-    perderVida() {
-        this.vidas--;
-        this.energia = 50;
-
-        if (this.vidas > 0) {
-            console.log(`\n💔 [VIDA PERDIDA] ${this.nombre} perdio una vida.`);
-            console.log(`Vidas restantes: ❤️ ${this.vidas}`);
-            console.log(`La energia se restablecio a ⚡ ${this.energia}.`);
-        }
-    }
-
-    mostrarEstado() {
-        console.log('\n========== 📊 ESTADO DEL PERSONAJE ==========');
-        console.log(`🏷️  Nombre  : ${this.nombre}`);
-        console.log(`⚡ Energia : ${this.energia}`);
-        console.log(`❤️  Vidas   : ${this.vidas}`);
-        console.log(`🗡️  Ataque  : ${this.ataque}`);
-        console.log('=============================================');
-    }
-}
-
-class Mono extends Animal {
-    constructor(nombre) { super(`🐒 ${nombre}`); this.ataque = 18; }
-    habilidadEspecial() {
-        this.energia -= 15;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`🤸 [ACCION] ${this.nombre} trepo agilmente a un arbol y avanzo por el bosque. Energia: ⚡ ${this.energia}`);
-    }
-}
-
-class Oso extends Animal {
-    constructor(nombre) { super(`🐻 ${nombre}`); this.ataque = 20; }
-    habilidadEspecial() {
-        this.energia -= 18;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`🐾 [ACCION] ${this.nombre} mueve arboles caidos y se abre camino por el bosque. Energia: ⚡ ${this.energia}`);
-    }
-}
-
-class Tigre extends Animal {
-    constructor(nombre) { super(`🐅 ${nombre}`); this.ataque = 22; }
-    habilidadEspecial() {
-        this.energia -= 17;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`🐾 [ACCION] ${this.nombre} da zarpazos a ramas y arbustos, abriendose camino. Energia: ⚡ ${this.energia}`);
-    }
-}
-
-class Zorro extends Animal {
-    constructor(nombre) { super(`🦊 ${nombre}`); this.ataque = 14; }
-    habilidadEspecial() {
-        this.energia -= 10;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`🍃 [ACCION] ${this.nombre} se escabulle rapidamente entre los arbustos. Energia: ⚡ ${this.energia}`);
-    }
-}
-
-class Conejo extends Animal {
-    constructor(nombre) { super(`🐰 ${nombre}`); this.ataque = 14; }
-    habilidadEspecial() {
-        this.energia -= 10;
-        if (this.energia < 0) this.energia = 0;
-        console.log(`💨 [ACCION] ${this.nombre} dio un gran salto entre los arbustos. Energia: ⚡ ${this.energia}`);
-    }
-}
-
-class Enemigo {
-    constructor(nombre, energia, ataque) {
-        this.nombre = nombre;
-        this.energia = energia;
-        this.ataque = ataque;
-    }
-    recibirDanio(cantidad) {
-        this.energia -= cantidad;
-        if (this.energia < 0) this.energia = 0;
-    }
-}
+//Importar las clases de personajes
+const { Mono, Oso, Tigre, Zorro, Conejo, Enemigo } = require('./clases/personajes.js');
 
 // ================================
 // FUNCIONES DEL JUEGO
@@ -144,7 +39,7 @@ function combate(jugador, enemigo) {
         const opcion = readline.question('Elige una opcion: ');
 
         if (opcion === '1') {
-            const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque;
+            const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque; 
             enemigo.recibirDanio(golpeJugador);
             console.log(`\n🗡️ [ATAQUE] ${jugador.nombre} ataco a ${enemigo.nombre} y le hizo ${golpeJugador} de danio.`);
 
@@ -203,12 +98,9 @@ function explorar(jugador) {
 
     const evento = Math.random();
 
-
     if (evento < 0.20) {
         console.log('\n🍃 El bosque esta tranquilo. No encontraste enemigos.');
         return 'sin_evento';
-
-
     } else if (evento < 0.35) {
         console.log('\n🕳️ ¡Caiste en una trampa! Recibes 20 de danio.');
         jugador.recibirDanio(20);
@@ -217,14 +109,10 @@ function explorar(jugador) {
             if (jugador.vidas <= 0) return 'derrota_total';
         }
         return 'trampa';
-
-
     } else if (evento < 0.50) {
         console.log('\n🍒 Encontraste frutas y agua fresca.');
         jugador.comer();
         return 'comida';
-
-
     } else if (evento < 0.60) {
         console.log('\n⛈️ ¡Una tormenta repentina te golpea! Recibes danio por el clima.');
         const danoClima = Math.floor(Math.random() * 15) + 5;
@@ -234,21 +122,15 @@ function explorar(jugador) {
             if (jugador.vidas <= 0) return 'derrota_total';
         }
         return 'clima_malo';
-
-
     } else if (evento < 0.65) {
         console.log('\n💎 ¡Descubriste un tesoro escondido! Recuperas energia y ganas un bonus de ataque.');
         jugador.energia = 100;
         jugador.ataque += 2;
         return 'tesoro';
-
-
     } else {
         const enemigo = crearEnemigoAleatorio();
         return combate(jugador, enemigo);
     }
-
-
 }
 
 // ================================
