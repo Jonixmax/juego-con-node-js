@@ -9,20 +9,20 @@ const { Mono, Oso, Tigre, Zorro, Conejo, Enemigo } = require('./clases/personaje
 // FUNCIONES DEL JUEGO
 // ================================
 function crearEnemigoAleatorio() {
+
     const enemigos = [
-        new Enemigo('🐺 Lobo Salvaje', 40, 12),
-        new Enemigo('🐻‍❄️ Oso Hambriento', 45, 13),
-        new Enemigo('🐈‍⬛ Pantera Sigilosa', 30, 15),
-        new Enemigo('🕷️ Arania Gigante', 25, 9),
-        new Enemigo('🐕 Perro Rabioso', 35, 10),
-        new Enemigo('🦂 Escorpion Venenoso', 30, 11),
-        new Enemigo('🐍 Serpiente Gigante', 35, 10),
-        new Enemigo('🐗 Jabali Furioso', 50, 14),
-        new Enemigo('🦅 Aguila Cazadora', 30, 11)
+        new Enemigo('🐺 Lobo Salvaje', 75, 16),
+        new Enemigo('🐻‍❄️ Oso Hambriento', 90, 18),
+        new Enemigo('🐈‍⬛ Pantera Sigilosa', 60, 22),
+        new Enemigo('🕷️ Arania Gigante', 45, 14),
+        new Enemigo('🐕 Perro Rabioso', 65, 15),
+        new Enemigo('🦂 Escorpion Venenoso', 50, 17),
+        new Enemigo('🐍 Serpiente Gigante', 55, 15),
+        new Enemigo('🐗 Jabali Furioso', 110, 19),
+        new Enemigo('🦅 Aguila Cazadora', 45, 16)
     ];
     return enemigos[Math.floor(Math.random() * enemigos.length)];
 }
-
 function combate(jugador, enemigo) {
     console.log('\n==================================');
     console.log(`⚠️ ¡Ha aparecido un enemigo: ${enemigo.nombre}!`);
@@ -43,7 +43,7 @@ function combate(jugador, enemigo) {
             if (Math.random() < 0.15) {
                 console.log(`\n💨 [FALLO] ${jugador.nombre} intento atacar, pero ${enemigo.nombre} lo esquivo rapidamente.`);
             } else {
-                const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque; 
+                const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque;
                 enemigo.recibirDanio(golpeJugador);
                 console.log(`\n🗡️ [ATAQUE] ${jugador.nombre} ataco a ${enemigo.nombre} y le hizo ${golpeJugador} de danio.`);
             }
@@ -51,29 +51,29 @@ function combate(jugador, enemigo) {
             // Turno de contraataque del enemigo
             if (enemigo.energia > 0) {
                 let golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
-                
+
                 // 20% de probabilidad de que el enemigo haga un Golpe Crítico
                 if (Math.random() < 0.20) {
                     golpeEnemigo += 10;
                     console.log(`\n⚠️ ¡GOLPE CRITICO DEL ENEMIGO!`);
                 }
-                
+
                 jugador.recibirDanio(golpeEnemigo);
                 console.log(`🩸 [CONTRAATAQUE] ${enemigo.nombre} te ataco e hizo ${golpeEnemigo} de danio.`);
             }
 
         } else if (opcion === '2') {
             let golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
-            
-            
+
+
             if (Math.random() < 0.20) { golpeEnemigo += 10; }
 
-            const reducido = Math.floor(golpeEnemigo / 3); 
+            const reducido = Math.floor(golpeEnemigo / 3);
             jugador.recibirDanio(reducido);
-            
-            
-            jugador.energia += 5; 
-            if(jugador.energia > 100) jugador.energia = 100;
+
+
+            jugador.energia += 5;
+            if (jugador.energia > 100) jugador.energia = 100;
 
             console.log(`\n🛡️ [DEFENSA] ${jugador.nombre} levanto la guardia, redujo el impacto y recupero 5 de energia.`);
             console.log(`🩸 [ATAQUE ENEMIGO] El impacto original era de ${golpeEnemigo}, pero solo recibiste ${reducido} de danio.`);
@@ -168,8 +168,8 @@ console.log('Elige tu personaje:');
 console.log('🦊 5. El Zorro Astuto');
 console.log('🐅 4. El Tigre Feroz');
 console.log('🐻 3. El Oso Fuerte');
-console.log('🐒 1. El Mono Agil');
 console.log('🐰 2. El Conejo Veloz');
+console.log('🐒 1. El Mono Agil');
 console.log('🚪 0. Salir');
 
 const opcionPersonaje = readline.question('\nIngresa una opcion: ');
@@ -191,7 +191,7 @@ else {
 }
 
 let exploracionesGanadas = 0;
-const metaExploraciones = 3;
+const metaExploraciones = 5;
 
 console.log(`\n🎉 ¡Bienvenido al bosque, ${jugador.nombre}!`);
 jugador.mostrarEstado();
@@ -234,9 +234,23 @@ while (jugador.vidas > 0) {
         }
 
     } else if (accion === '2') {
-        jugador.descansar();
+
+        if (Math.random() < 0.30) {
+            console.log('\n⚠️ ¡Oh no! Bajaste la guardia para dormir y un enemigo te encontro.');
+            const enemigo = crearEnemigoAleatorio();
+            combate(jugador, enemigo);
+        } else {
+            jugador.descansar();
+        }
     } else if (accion === '3') {
-        jugador.comer();
+        // 40% de probabilidad de emboscada al hacer ruido buscando comida
+        if (Math.random() < 0.40) {
+            console.log('\n⚠️ ¡Cuidado! Mientras hurgabas en los arbustos buscando comida, fuiste emboscado.');
+            const enemigo = crearEnemigoAleatorio();
+            combate(jugador, enemigo);
+        } else {
+            jugador.comer();
+        }
     } else if (accion === '4') {
         jugador.mostrarEstado();
     } else if (accion === '0') {

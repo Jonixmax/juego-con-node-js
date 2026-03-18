@@ -1,23 +1,27 @@
-
+// ================================
+// ARCHIVO: clases/personajes.js
+// ================================
 
 class Animal {
     constructor(nombre) {
         this.nombre = nombre;
-        this.energia = 100;
-        this.vidas = 3;
-        this.ataque = 15;
+        this.energia = 80; 
+        this.vidas = 2;   
+        this.ataque = 8;   
     }
 
     descansar() {
         this.energia += 20;
-        if (this.energia > 100) this.energia = 100;
+        
+        if (this.energia > 80) this.energia = 80; 
         console.log(`\n💤 [DESCANSO] ${this.nombre} tomo una siesta y recupero energia. Energia actual: ⚡ ${this.energia}`);
     }
 
     comer() {
         const comidaEncontrada = Math.floor(Math.random() * 21) + 10;
         this.energia += comidaEncontrada;
-        if (this.energia > 100) this.energia = 100;
+      
+        if (this.energia > 80) this.energia = 80;
         console.log(`\n🍎 [COMIDA] ${this.nombre} encontro algo de comer y recupero ${comidaEncontrada} de energia.`);
         console.log(`Energia actual: ⚡ ${this.energia}`);
     }
@@ -30,7 +34,7 @@ class Animal {
 
     perderVida() {
         this.vidas--;
-        this.energia = 50;
+        this.energia = 40; 
 
         if (this.vidas > 0) {
             console.log(`\n💔 [VIDA PERDIDA] ${this.nombre} perdio una vida.`);
@@ -42,15 +46,16 @@ class Animal {
     mostrarEstado() {
         console.log('\n========== 📊 ESTADO DEL PERSONAJE ==========');
         console.log(`🏷️  Nombre  : ${this.nombre}`);
-        console.log(`⚡ Energia : ${this.energia}`);
+        console.log(`⚡ Energia : ${this.energia} / 80`);
         console.log(`❤️  Vidas   : ${this.vidas}`);
         console.log(`🗡️  Ataque  : ${this.ataque}`);
         console.log('=============================================');
     }
 }
 
+
 class Mono extends Animal {
-    constructor(nombre) { super(`🐒 ${nombre}`); this.ataque = 18; }
+    constructor(nombre) { super(`🐒 ${nombre}`); this.ataque = 10; }
     habilidadEspecial() {
         this.energia -= 15;
         if (this.energia < 0) this.energia = 0;
@@ -59,7 +64,7 @@ class Mono extends Animal {
 }
 
 class Oso extends Animal {
-    constructor(nombre) { super(`🐻 ${nombre}`); this.ataque = 20; }
+    constructor(nombre) { super(`🐻 ${nombre}`); this.ataque = 14; }
     habilidadEspecial() {
         this.energia -= 18;
         if (this.energia < 0) this.energia = 0;
@@ -68,7 +73,7 @@ class Oso extends Animal {
 }
 
 class Tigre extends Animal {
-    constructor(nombre) { super(`🐅 ${nombre}`); this.ataque = 22; }
+    constructor(nombre) { super(`🐅 ${nombre}`); this.ataque = 16; }
     habilidadEspecial() {
         this.energia -= 17;
         if (this.energia < 0) this.energia = 0;
@@ -77,7 +82,7 @@ class Tigre extends Animal {
 }
 
 class Zorro extends Animal {
-    constructor(nombre) { super(`🦊 ${nombre}`); this.ataque = 14; }
+    constructor(nombre) { super(`🦊 ${nombre}`); this.ataque = 8; }
     habilidadEspecial() {
         this.energia -= 10;
         if (this.energia < 0) this.energia = 0;
@@ -86,7 +91,7 @@ class Zorro extends Animal {
 }
 
 class Conejo extends Animal {
-    constructor(nombre) { super(`🐰 ${nombre}`); this.ataque = 14; }
+    constructor(nombre) { super(`🐰 ${nombre}`); this.ataque = 8; }
     habilidadEspecial() {
         this.energia -= 10;
         if (this.energia < 0) this.energia = 0;
@@ -106,7 +111,6 @@ class Enemigo {
     }
 }
 
-// Exportamos las clases para que otros archivos puedan "requerirlas"
 module.exports = {
     Animal,
     Mono,
