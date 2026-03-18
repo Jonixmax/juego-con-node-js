@@ -39,22 +39,44 @@ function combate(jugador, enemigo) {
         const opcion = readline.question('Elige una opcion: ');
 
         if (opcion === '1') {
-            const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque; 
-            enemigo.recibirDanio(golpeJugador);
-            console.log(`\n🗡️ [ATAQUE] ${jugador.nombre} ataco a ${enemigo.nombre} y le hizo ${golpeJugador} de danio.`);
+            // 15% de probabilidad de que el jugador falle el ataque
+            if (Math.random() < 0.15) {
+                console.log(`\n💨 [FALLO] ${jugador.nombre} intento atacar, pero ${enemigo.nombre} lo esquivo rapidamente.`);
+            } else {
+                const golpeJugador = Math.floor(Math.random() * 11) + jugador.ataque; 
+                enemigo.recibirDanio(golpeJugador);
+                console.log(`\n🗡️ [ATAQUE] ${jugador.nombre} ataco a ${enemigo.nombre} y le hizo ${golpeJugador} de danio.`);
+            }
 
+            // Turno de contraataque del enemigo
             if (enemigo.energia > 0) {
-                const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                let golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                
+                // 20% de probabilidad de que el enemigo haga un Golpe Crítico
+                if (Math.random() < 0.20) {
+                    golpeEnemigo += 10;
+                    console.log(`\n⚠️ ¡GOLPE CRITICO DEL ENEMIGO!`);
+                }
+                
                 jugador.recibirDanio(golpeEnemigo);
                 console.log(`🩸 [CONTRAATAQUE] ${enemigo.nombre} te ataco e hizo ${golpeEnemigo} de danio.`);
             }
 
         } else if (opcion === '2') {
-            const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
-            const reducido = Math.floor(golpeEnemigo / 2);
+            let golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+            
+            
+            if (Math.random() < 0.20) { golpeEnemigo += 10; }
+
+            const reducido = Math.floor(golpeEnemigo / 3); 
             jugador.recibirDanio(reducido);
-            console.log(`\n🛡️ [DEFENSA] ${jugador.nombre} se defendio.`);
-            console.log(`🩸 [ATAQUE ENEMIGO] ${enemigo.nombre} hizo ${golpeEnemigo}, pero solo recibiste ${reducido} de danio.`);
+            
+            
+            jugador.energia += 5; 
+            if(jugador.energia > 100) jugador.energia = 100;
+
+            console.log(`\n🛡️ [DEFENSA] ${jugador.nombre} levanto la guardia, redujo el impacto y recupero 5 de energia.`);
+            console.log(`🩸 [ATAQUE ENEMIGO] El impacto original era de ${golpeEnemigo}, pero solo recibiste ${reducido} de danio.`);
 
         } else if (opcion === '3') {
             if (Math.random() < 0.5) {
@@ -62,9 +84,10 @@ function combate(jugador, enemigo) {
                 return 'huida';
             } else {
                 console.log(`\n❌ [HUIDA FALLIDA] No pudiste escapar.`);
-                const golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                let golpeEnemigo = Math.floor(Math.random() * 8) + enemigo.ataque;
+                if (Math.random() < 0.20) { golpeEnemigo += 10; console.log(`\n⚠️ ¡GOLPE CRITICO DEL ENEMIGO!`); }
                 jugador.recibirDanio(golpeEnemigo);
-                console.log(`🩸 ${enemigo.nombre} te golpeo mientras intentabas huir.`);
+                console.log(`🩸 ${enemigo.nombre} te golpeo con ${golpeEnemigo} de danio mientras intentabas huir.`);
             }
         } else {
             console.log('\n🚫 Opcion invalida.');
